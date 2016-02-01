@@ -64,11 +64,13 @@ except:
 class Globals:
     disk_image_path = None;
 
+
 class Output:
     @staticmethod
     def log_fatal(msg):
         print "[FATAL] {}".format(msg);
         exit(1);
+
 
 class USBInfo:
     def __init__(self):
@@ -80,7 +82,7 @@ class USBInfo:
     def get_disk_info_at(self, index):
         return self._items_list[index];
 
-    def find_all_usb_disks(self):
+    def find_all_disks(self):
         LSBLK_COMMAND="lsblk -inP -o NAME,MODEL,SIZE,TYPE {}";
 
         for block_item in os.listdir("/sys/block/"):
@@ -203,8 +205,6 @@ def create_bootable_disk(out_disk_path):
 
 
 
-
-
 ################################################################################
 ## Script Initialization                                                      ##
 ################################################################################
@@ -224,7 +224,7 @@ def main():
 
     #Get the info about the usb sticks attached to computer.
     usb_info = USBInfo();
-    usb_info.find_all_usb_disks();
+    usb_info.find_all_disks();
 
     selected_disk = prompt_install_disk(usb_info);
     prompt_make_sure_that_is_correct_disk(usb_info, selected_disk);

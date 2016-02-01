@@ -1,1 +1,3 @@
 version 0.1:
+	Finish the basic implementation
+	But only make on disk and didn't make any more tests.

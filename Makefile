@@ -40,10 +40,10 @@
 
 
 install:
-	cp -f ./usbbootcreator.py /usr/local/bin/usb-boot-creator
-	chmod 755 /usr/local/bin/usb-boot-creator
+	cp -f ./usbbootcreator.py /usr/local/bin/linux_usbbootcreator
+	chmod 755 /usr/local/bin/linux_usbbootcreator
 
 uninstall:
-	rm -f /usr/local/bin/usb-boot-creator
+	rm -f /usr/local/bin/linux_usbbootcreator
 
 
