@@ -72,7 +72,7 @@ class Output:
         exit(1);
 
 
-class USBInfo:
+class DiskInfo:
     def __init__(self):
         self._items_list = [];
 
@@ -83,22 +83,40 @@ class USBInfo:
         return self._items_list[index];
 
     def find_all_disks(self):
-        LSBLK_COMMAND="lsblk -inP -o NAME,MODEL,SIZE,TYPE {}";
+        #Constants...
+        LSBLK_COMMAND     = "lsblk -inP -o NAME,MODEL,SIZE,TYPE {}";
+        BLOCK_DIR_PATH    = "/sys/block/";
+        DEVICE_DIR_SUFFIX = "/device";
+        DEV_DIR_PATH      = "/dev/";
 
-        for block_item in os.listdir("/sys/block/"):
-            if(os.path.exists("/sys/block/" + block_item + "/device")):
-                full_block_name = "/dev/{}".format(block_item);
+        #Iterate for all "block devices".
+        for block_item in os.listdir(BLOCK_DIR_PATH):
+            full_block_device_path = os.path.join(BLOCK_DIR_PATH, 
+                                                  block_item, 
+                                                  DEVICE_DIR_SUFFIX);
+
+            if(os.path.exists(full_block_device_path)):
+                full_block_name = os.path.join(DEV_DIR_PATH, block_item);
                 cmd             = LSBLK_COMMAND.format(full_block_name);
 
+                #Execute the command as a subprocess and capture the output.
                 output = subprocess.check_output(cmd, shell=True);
-                output = output.replace("\n",":")
-                output = output[0:output.find(":")];
 
+                #Clean up the output 
+                DUMMY_CHAR = ":";
+                output = output.replace("\n", DUMMY_CHAR)
+                output = output[0:output.find(DUMMY_CHAR)];
+
+                #The output came as string composed of KEY=VALUES pairs.
+                #So split them into a manageable piece of information 
+                #And set it to the block_item_info.
                 block_item_info = {};
                 for item_info_piece in shlex.split(output):
                     key,value = item_info_piece.split("=");
                     block_item_info[key]=value.lstrip(" ").rstrip(" ");
 
+                #We're only interested in disk devices, so discard all that
+                #doesn't match the criteria.
                 if(block_item_info["TYPE"] == "disk"):
                     self._items_list.append(block_item_info);
 
@@ -124,84 +142,125 @@ def check_disk_image_path():
 ################################################################################
 ## Disk Printing                                                              ##
 ################################################################################
-def print_usb_item_info(index, usb_item):
-    print "({})  {} : {} : {:6} : {}".format(
-        index,
-        "/dev/" + usb_item["NAME"],
-        usb_item["TYPE"],
-        usb_item["SIZE"],
-        usb_item["MODEL"]);
+def print_disk_item_info(index, usb_item):
+    print "({})  {} : {} : {:6} : {}".format(index,
+                                             "/dev/" + usb_item["NAME"],
+                                             usb_item["TYPE"],
+                                             usb_item["SIZE"],
+                                             usb_item["MODEL"]);
 
 
-def present_usb_info(usb_info):
-    print "The following was found:";
+def present_disk_info(disk_info):
+    print "Found the following disk(s):";
     index = 1;
-    for usb_item in usb_info.get_info_list():
-        print_usb_item_info(index, usb_item);
+    for usb_item in disk_info.get_info_list():
+        print_disk_item_info(index, usb_item);
         index += 1;
 
 
 ################################################################################
 ## Prompts                                                                    ##
 ################################################################################
-def prompt_install_disk(usb_info):
+def prompt_install_disk(disk_info):
+    #Continue while the user cancels or enter a valid input...
     while(1):
-        present_usb_info(usb_info);
-        print "Choose the disk carefully...";
-        print;
+        #Print the info to user.
+        present_disk_info(disk_info);        
+
+        print "Choose the disk carefully...\n";
         print "Please insert the disk number [OR ^C TO CANCEL]";
 
-        prompt = "Disk Number (1-{}):".format(usb_info.get_number_of_disks());
+        prompt = "Disk Number (1-{}):".format(disk_info.get_number_of_disks());
+
+        #Get the input.
         index = raw_input(prompt);
 
-        if(not index.isdigit() or
-           int(index) < 1 or
-           int(index) > usb_info.get_number_of_disks()):
-            print "Invalid disk number: ({})".format(index);
+
+        #The input is not a digit - Inform the user and go 
+        #straight to begin of loop.
+        if(not index.isdigit()):
+            print "Invalid input: ({}) - Enter the number of the desired disk".format(index);
             raw_input();
+            continue;
+
+
+        index = int(index);
+        
+        #Check if the index is valid.
+        if(index >= 1 and index <= disk_info.get_number_of_disks()):
+            return index;       
         else:
-            return int(index);
+            print "Invalid index: ({}) - Make sure that index is inside the range".format(index);
+            raw_input();
+            continue;
 
 
-def prompt_make_sure_that_is_correct_disk(usb_info, selected_disk):
-    print
-    print "ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?";
-    print "     WE'RE GOING TO A POINT OF NO RETURN";
-    print "SO MAKE **SURE** THAT THE DISK INFO IS CORRECT";
-    print "IF NOT (OR YOU ARE IN DOUBT PRESS ^C TO CANCEL";
-    print
+def prompt_make_sure_that_is_correct_disk(disk_info, selected_disk):
+    ## Define the messages...
+    warning_msg = """
+ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
+     WE'RE GOING TO A POINT OF NO RETURN
+ SO MAKE **SURE** THAT THE DISK INFO IS CORRECT
+ IF NOT (OR YOU ARE IN DOUBT PRESS ^C TO CANCEL
+""";
+    
+    #Print the info to user.
+    print warning_msg;
+
     print "The disk info is:";
-    print_usb_item_info(selected_disk,
-                        usb_info.get_disk_info_at(selected_disk -1));
+    print_disk_item_info(selected_disk,
+                        disk_info.get_disk_info_at(selected_disk -1));
 
-    print;
-    print "Are you SURE?:";
-    value = raw_input("Type 'yes' to continue:");
+
+    print "\nAre you SURE?:";
+
+    #Get the input.
+    value = raw_input("Type 'yes' to continue: ");
+
+    #Do some sanity checks...
     if(value != "yes"):
-        Output.log_fatal("Invalid values was provided - Canceling...");
+        Output.log_fatal("Invalid value was provided - Canceling...");
 
 
 ################################################################################
 ## DD                                                                         ##
 ################################################################################
 def create_bootable_disk(out_disk_path):
+    #Build the commands that will be executed...
     in_disk_path = os.path.abspath(Globals.disk_image_path);
-    cmd_dd = "sudo dd if={} of={} bs=1m".format(in_disk_path,
-                                                out_disk_path);
+    cmd_dd      = "sudo dd if={} of={} bs=1m && sync".format(in_disk_path,
+                                                             out_disk_path);
 
-    print "Creating bootable disk.";
-    print "This program uses dd(1) to accomplish the task."
-    print "But it generates no output while it's performing the operation";
-    print "So take a cup of coffee - When the task is done we show to you :)";
-    print "PS: dd(1) requires super user mode!"
+    ## Define the messages...
+    start_msg = """
+-- Creating bootable disk --
+This program uses dd(1) to create the boot disk but dd(1) 
+does not generate output while performing the operation.
 
-    print;
-    print "Source is: {}".format(in_disk_path);
-    print "Destination is: {}".format(out_disk_path);
-    print;
+So take a cup of coffee - When the dd(1) operation is done we show to you :)
 
-    print "dd(1) command is: {}".format(cmd_dd);
-    print
+PS: dd(1) requires super user mode - So enter your password if requested.
+
+""";
+    
+    end_msg = "OK... everything is done - Enjoy your Linux installation :)";
+    
+
+    #Print the info to user.
+    print start_msg;
+    
+    print "Source is       : ({})".format(in_disk_path);
+    print "Destination is  : ({})".format(out_disk_path);
+    print "dd(1) command is: ({})".format(cmd_dd);
+
+
+    #Execute the dd command.
+    if(os.system(cmd_dd) != 0):
+        Output.log_fatal("Error while executing dd(1)");
+
+
+    #Just print a goodbye...
+    print end_msg;
 
 
 
@@ -223,13 +282,13 @@ def main():
     check_disk_image_path();
 
     #Get the info about the usb sticks attached to computer.
-    usb_info = USBInfo();
-    usb_info.find_all_disks();
+    disk_info = DiskInfo();
+    disk_info.find_all_disks();
 
-    selected_disk = prompt_install_disk(usb_info);
-    prompt_make_sure_that_is_correct_disk(usb_info, selected_disk);
+    selected_disk = prompt_install_disk(disk_info);
+    prompt_make_sure_that_is_correct_disk(disk_info, selected_disk);
 
-    name = usb_info.get_disk_info_at(selected_disk-1)["NAME"];
+    name = disk_info.get_disk_info_at(selected_disk-1)["NAME"];
     output_disk_path = os.path.join("/dev/", name);
     create_bootable_disk(output_disk_path);
 

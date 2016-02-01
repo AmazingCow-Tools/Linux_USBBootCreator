@@ -1,3 +1,12 @@
 version 0.1:
-	Finish the basic implementation
-	But only make on disk and didn't make any more tests.
+    Finish the basic implementation
+    But only make on disk and didn't make any more tests.
+
+version 0.2 - FEB 1 2016
+    DID NOT TEST THE CODE :/
+    
+    A lot of refactoring.
+    Change USBInfo to DiskInfo to better reflect it's purpose.
+    Add a lot of comments.
+    Change several chained prints statements to one print with the """ """ string.
+    Change some messages.
