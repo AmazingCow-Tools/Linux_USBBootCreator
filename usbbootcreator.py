@@ -86,13 +86,13 @@ class DiskInfo:
         #Constants...
         LSBLK_COMMAND     = "lsblk -inP -o NAME,MODEL,SIZE,TYPE {}";
         BLOCK_DIR_PATH    = "/sys/block/";
-        DEVICE_DIR_SUFFIX = "/device";
+        DEVICE_DIR_SUFFIX = "device";
         DEV_DIR_PATH      = "/dev/";
 
         #Iterate for all "block devices".
         for block_item in os.listdir(BLOCK_DIR_PATH):
-            full_block_device_path = os.path.join(BLOCK_DIR_PATH, 
-                                                  block_item, 
+            full_block_device_path = os.path.join(BLOCK_DIR_PATH,
+                                                  block_item,
                                                   DEVICE_DIR_SUFFIX);
 
             if(os.path.exists(full_block_device_path)):
@@ -102,13 +102,13 @@ class DiskInfo:
                 #Execute the command as a subprocess and capture the output.
                 output = subprocess.check_output(cmd, shell=True);
 
-                #Clean up the output 
+                #Clean up the output
                 DUMMY_CHAR = ":";
                 output = output.replace("\n", DUMMY_CHAR)
                 output = output[0:output.find(DUMMY_CHAR)];
 
                 #The output came as string composed of KEY=VALUES pairs.
-                #So split them into a manageable piece of information 
+                #So split them into a manageable piece of information
                 #And set it to the block_item_info.
                 block_item_info = {};
                 for item_info_piece in shlex.split(output):
@@ -165,7 +165,7 @@ def prompt_install_disk(disk_info):
     #Continue while the user cancels or enter a valid input...
     while(1):
         #Print the info to user.
-        present_disk_info(disk_info);        
+        present_disk_info(disk_info);
 
         print "Choose the disk carefully...\n";
         print "Please insert the disk number [OR ^C TO CANCEL]";
@@ -176,7 +176,7 @@ def prompt_install_disk(disk_info):
         index = raw_input(prompt);
 
 
-        #The input is not a digit - Inform the user and go 
+        #The input is not a digit - Inform the user and go
         #straight to begin of loop.
         if(not index.isdigit()):
             print "Invalid input: ({}) - Enter the number of the desired disk".format(index);
@@ -185,10 +185,10 @@ def prompt_install_disk(disk_info):
 
 
         index = int(index);
-        
+
         #Check if the index is valid.
         if(index >= 1 and index <= disk_info.get_number_of_disks()):
-            return index;       
+            return index;
         else:
             print "Invalid index: ({}) - Make sure that index is inside the range".format(index);
             raw_input();
@@ -203,7 +203,7 @@ ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
  SO MAKE **SURE** THAT THE DISK INFO IS CORRECT
  IF NOT (OR YOU ARE IN DOUBT PRESS ^C TO CANCEL
 """;
-    
+
     #Print the info to user.
     print warning_msg;
 
@@ -234,7 +234,7 @@ def create_bootable_disk(out_disk_path):
     ## Define the messages...
     start_msg = """
 -- Creating bootable disk --
-This program uses dd(1) to create the boot disk but dd(1) 
+This program uses dd(1) to create the boot disk but dd(1)
 does not generate output while performing the operation.
 
 So take a cup of coffee - When the dd(1) operation is done we show to you :)
@@ -242,13 +242,13 @@ So take a cup of coffee - When the dd(1) operation is done we show to you :)
 PS: dd(1) requires super user mode - So enter your password if requested.
 
 """;
-    
+
     end_msg = "OK... everything is done - Enjoy your Linux installation :)";
-    
+
 
     #Print the info to user.
     print start_msg;
-    
+
     print "Source is       : ({})".format(in_disk_path);
     print "Destination is  : ({})".format(out_disk_path);
     print "dd(1) command is: ({})".format(cmd_dd);
