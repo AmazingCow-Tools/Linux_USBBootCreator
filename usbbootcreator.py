@@ -125,6 +125,10 @@ class DiskInfo:
 ################################################################################
 ## Helper Methods                                                             ##
 ################################################################################
+
+def canonize_path(path):
+    return os.path.abspath(os.path.expanduser(path));
+
 def check_disk_image_path(disk_image_path):
     if(disk_image_path is None):
         msg = "No Disk Image Path was provided.";
@@ -223,8 +227,8 @@ ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
 ################################################################################
 def create_bootable_disk(disk_image_path, out_disk_path):
     #Build the commands that will be executed...
-    in_disk_path = os.path.abspath(Globals.disk_image_path);
-    cmd_dd      = "sudo dd if={} of={} bs=1m && sync".format(in_disk_path,
+    in_disk_path = canonize_path = disk_image_path;
+    cmd_dd      = "sudo dd if={} of={} bs=1M && sync".format(in_disk_path,
                                                              out_disk_path);
 
     ## Define the messages...
@@ -276,6 +280,7 @@ def main():
             disk_image_path = value;
 
     #Perform some sanity checks...
+    disk_image_path = canonize_path(disk_image_path);
     check_disk_image_path(disk_image_path);
 
     #Get the info about the usb sticks attached to computer.
@@ -286,7 +291,7 @@ def main():
     prompt_make_sure_that_is_correct_disk(disk_info, selected_disk);
 
     name = disk_info.get_disk_info_at(selected_disk-1)["NAME"];
-    output_disk_path = os.path.join("/dev/", name);
+    output_disk_path = canonize_path(os.path.join("/dev/", name));
     create_bootable_disk(disk_image_path, output_disk_path);
 
 
