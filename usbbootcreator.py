@@ -61,10 +61,6 @@ except:
 ################################################################################
 ## Classes                                                                    ##
 ################################################################################
-class Globals:
-    disk_image_path = None;
-
-
 class Output:
     @staticmethod
     def log_fatal(msg):
@@ -129,13 +125,13 @@ class DiskInfo:
 ################################################################################
 ## Helper Methods                                                             ##
 ################################################################################
-def check_disk_image_path():
-    if(Globals.disk_image_path is None):
+def check_disk_image_path(disk_image_path):
+    if(disk_image_path is None):
         msg = "No Disk Image Path was provided.";
         Output.log_fatal(msg);
 
-    if(not os.path.exists(Globals.disk_image_path)):
-        msg = "Disk Image Path isn't valid. ({})".format(Globals.disk_image_path);
+    if(not os.path.exists(disk_image_path)):
+        msg = "Disk Image Path isn't valid. ({})".format(disk_image_path);
         Output.log_fatal(msg);
 
 
@@ -225,7 +221,7 @@ ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
 ################################################################################
 ## DD                                                                         ##
 ################################################################################
-def create_bootable_disk(out_disk_path):
+def create_bootable_disk(disk_image_path, out_disk_path):
     #Build the commands that will be executed...
     in_disk_path = os.path.abspath(Globals.disk_image_path);
     cmd_dd      = "sudo dd if={} of={} bs=1m && sync".format(in_disk_path,
@@ -271,15 +267,16 @@ def main():
     #Get the command line options.
     options = getopt.gnu_getopt(sys.argv[1:], "", ["image="]);
 
+    disk_image_path = None;
     #Parse the options.
     for key, value in options[0]:
         key = key.strip("-");
 
         if(key in "image"):
-            Globals.disk_image_path = value;
+            disk_image_path = value;
 
     #Perform some sanity checks...
-    check_disk_image_path();
+    check_disk_image_path(disk_image_path);
 
     #Get the info about the usb sticks attached to computer.
     disk_info = DiskInfo();
@@ -290,7 +287,7 @@ def main():
 
     name = disk_info.get_disk_info_at(selected_disk-1)["NAME"];
     output_disk_path = os.path.join("/dev/", name);
-    create_bootable_disk(output_disk_path);
+    create_bootable_disk(disk_image_path, output_disk_path);
 
 
 if __name__ == '__main__':
