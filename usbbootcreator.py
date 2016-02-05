@@ -61,11 +61,59 @@ except:
 ################################################################################
 ## Classes                                                                    ##
 ################################################################################
+class Constants:
+    #Flags.
+    ALL_FLAGS_SHORT = "hv";
+    ALL_FLAGS_LONG  = ["help",
+                       "version",
+                       "image="];
+
+    FLAG_HELP        = "h", "help";
+    FLAG_VERSION     = "v", "version";
+    FLAG_IMG         =      "image";
+
+    #App
+    APP_NAME      = "linux_usbbootcreator";
+    APP_VERSION   = "0.1.0";
+    APP_AUTHOR    = "N2OMatt <n2omatt@amazingcow.com>"
+    APP_COPYRIGHT = "\n".join(("Copyright (c) 2015, 2016 - Amazing Cow",
+                               "This is a free software (GPLv3) - Share/Hack it",
+                               "Check opensource.amazingcow.com for more :)"));
+
+
+
 class Output:
     @staticmethod
     def log_fatal(msg):
         print "[FATAL] {}".format(msg);
         exit(1);
+
+    @staticmethod
+    def show_help():
+        msg = "Usage:" +"""
+linux_usbbootcreator [-hv] --image=<path>
+
+Options:
+ *-h --help         : Show this screen.
+ *-v --version      : Show app version and copyright.
+     --image <path> : The path of .iso.
+
+Notes:
+  TAKE A LOT OF CARE, you will need perform dd(1) as superuser, so double
+  check your disk name before do anything stupid.
+
+  Options marked with * are exclusive, i.e. the linux_usbbootcreator will run that
+  and exit successfully after the operation.
+  """;
+        print msg;
+
+    @staticmethod
+    def show_version():
+        print "{} - {} - {}".format(Constants.APP_NAME,
+                                    Constants.APP_VERSION,
+                                    Constants.APP_AUTHOR);
+        print Constants.APP_COPYRIGHT;
+        print;
 
 
 class DiskInfo:
@@ -269,15 +317,28 @@ PS: dd(1) requires super user mode - So enter your password if requested.
 ################################################################################
 def main():
     #Get the command line options.
-    options = getopt.gnu_getopt(sys.argv[1:], "", ["image="]);
+    options = getopt.gnu_getopt(sys.argv[1:],
+                                Constants.ALL_FLAGS_SHORT,
+                                Constants.ALL_FLAGS_LONG);
 
     disk_image_path = None;
+
     #Parse the options.
     for key, value in options[0]:
         key = key.strip("-");
 
-        if(key in "image"):
+        if(key in Constants.FLAG_HELP):
+            Output.show_help();
+            exit(0);
+        elif(key in Constants.FLAG_VERSION):
+            Output.show_version();
+            exit(0);
+        elif(key in Constants.FLAG_IMG):
             disk_image_path = value;
+
+    if(disk_image_path is None):
+        Output.show_help();
+        exit(1);
 
     #Perform some sanity checks...
     disk_image_path = canonize_path(disk_image_path);
