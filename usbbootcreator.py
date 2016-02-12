@@ -74,7 +74,7 @@ class Constants:
 
     #App
     APP_NAME      = "linux_usbbootcreator";
-    APP_VERSION   = "0.1.0";
+    APP_VERSION   = "0.3.0";
     APP_AUTHOR    = "N2OMatt <n2omatt@amazingcow.com>"
     APP_COPYRIGHT = "\n".join(("Copyright (c) 2015, 2016 - Amazing Cow",
                                "This is a free software (GPLv3) - Share/Hack it",
