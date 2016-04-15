@@ -1,10 +1,51 @@
-version 0.1:
-    Finish the basic implementation
-    But only make on disk and didn't make any more tests.
+================================================================================
+| Start v0.4.x                                                                 |
+================================================================================
+version 0.4.0 - Apr 15, 2016
+-- General --
+   - Corrects and improve the output messages.
+   - Make the path to disk a non flag argument (as it should be).
+   - Change the install name to usb-boot-creator.
 
+-- Source --
+   usbbootcreator.py
+      - Update the version number.
+      - Sort the import statements.
+      - Update the help screen.
+      - Break some long statements to respect the 80 columns limit.
+      - Improve and fix the output messages.
+      - Do some cosmetic changes.
+      - Provide a catch for ^C exception.
+      - Add some comments.
+
+   Makefile
+     - Change the name of install program.
+
+-- Info Files --
+   README.md
+     - Update the README to be consistent with other Amazing Cow programs.
+     - Add the OLDREADME.md to history sake.
+
+   CHANGELOG.txt
+     - Update the version | date format.
+     - Update the sort order - New entries are on top now.
+     - Split the CHANGELOG entry in sections.
+
+
+================================================================================
+| Start v0.3.x                                                                 |
+================================================================================
+version 0.3 - FEB 12 2016
+    Fix the version number.
+    Write the README.
+
+
+================================================================================
+| Start v0.2.x                                                                 |
+================================================================================
 version 0.2 - FEB 1 2016
     DID NOT TEST THE CODE :/
-    
+
     A lot of refactoring.
     Change USBInfo to DiskInfo to better reflect it's purpose.
     Add a lot of comments.
@@ -12,6 +53,9 @@ version 0.2 - FEB 1 2016
     Change some messages.
 
 
-version 0.3 - FEB 12 2016
-    Fix the version number.
-    Write the README.
+================================================================================
+| Start v0.1.x                                                                 |
+================================================================================
+version 0.1:
+    Finish the basic implementation
+    But only make on disk and didn't make any more tests.
