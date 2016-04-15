@@ -40,25 +40,13 @@
 ##                                  Enjoy :)                                  ##
 ##----------------------------------------------------------------------------##
 
-#COWTODO: Change the termcolor to cowtermcolor.
-
 ## Imports ##
-import os;
-import os.path;
 import getopt;
-import sys;
-import subprocess;
+import os.path;
+import os;
 import shlex;
-
-#Since termcolor isn't a standard package do not force the user to have it.
-#But print a *nice* message about the lost features :)
-try:
-    from termcolor import colored;
-except:
-    print "termcolor cannot be imported - No colors for you :/";
-    def colored(msg, color):
-        return msg;
-
+import subprocess;
+import sys;
 
 ################################################################################
 ## Classes                                                                    ##
@@ -66,23 +54,18 @@ except:
 class Constants:
     #Flags.
     ALL_FLAGS_SHORT = "hv";
-    ALL_FLAGS_LONG  = ["help",
-                       "version",
-                       "image="];
+    ALL_FLAGS_LONG  = ["help", "version"];
 
-    FLAG_HELP        = "h", "help";
-    FLAG_VERSION     = "v", "version";
-    FLAG_IMG         =      "image";
+    FLAG_HELP    = "h", "help";
+    FLAG_VERSION = "v", "version";
 
     #App
-    APP_NAME      = "linux_usbbootcreator";
-    APP_VERSION   = "0.3.0";
+    APP_NAME      = "usb-boot-creator";
+    APP_VERSION   = "0.4.0";
     APP_AUTHOR    = "N2OMatt <n2omatt@amazingcow.com>"
     APP_COPYRIGHT = "\n".join(("Copyright (c) 2015, 2016 - Amazing Cow",
                                "This is a free software (GPLv3) - Share/Hack it",
                                "Check opensource.amazingcow.com for more :)"));
-
-
 
 class Output:
     @staticmethod
@@ -92,22 +75,22 @@ class Output:
 
     @staticmethod
     def show_help():
-        msg = "Usage:" +"""
-linux_usbbootcreator [-hv] --image=<path>
+        msg = """Usage:
+usb-book-creator [-hv] <disk-image-path>
 
 Options:
- *-h --help         : Show this screen.
- *-v --version      : Show app version and copyright.
-     --image <path> : The path of .iso.
+  *-h --help    : Show this screen.
+  *-v --version : Show app version and copyright.
 
 Notes:
-  TAKE A LOT OF CARE, you will need perform dd(1) as superuser, so double
-  check your disk name before do anything stupid.
+  TAKE [A LOT OF] CARE, this program need perform dd(1) as,
+  SUPERUSER so double check your disk name before do anything stupid.
 
-  Options marked with * are exclusive, i.e. the linux_usbbootcreator will run that
-  and exit successfully after the operation.
+  Options marked with * are exclusive, i.e. the usb-book-creator
+  will run that and exit successfully after the operation.
   """;
         print msg;
+        exit(0);
 
     @staticmethod
     def show_version():
@@ -115,7 +98,8 @@ Notes:
                                     Constants.APP_VERSION,
                                     Constants.APP_AUTHOR);
         print Constants.APP_COPYRIGHT;
-        print;
+        print
+        exit(0);
 
 
 class DiskInfo:
@@ -175,7 +159,6 @@ class DiskInfo:
 ################################################################################
 ## Helper Methods                                                             ##
 ################################################################################
-
 def canonize_path(path):
     return os.path.abspath(os.path.expanduser(path));
 
@@ -198,7 +181,6 @@ def print_disk_item_info(index, usb_item):
                                              usb_item["TYPE"],
                                              usb_item["SIZE"],
                                              usb_item["MODEL"]);
-
 
 def present_disk_info(disk_info):
     print "Found the following disk(s):";
@@ -229,7 +211,9 @@ def prompt_install_disk(disk_info):
         #The input is not a digit - Inform the user and go
         #straight to begin of loop.
         if(not index.isdigit()):
-            print "Invalid input: ({}) - Enter the number of the desired disk".format(index);
+            msg = "{} ({}) - {}".format("Invalid input:", index,
+                                         "Enter the number of the desired disk");
+            print msg;
             raw_input();
             continue;
 
@@ -240,7 +224,9 @@ def prompt_install_disk(disk_info):
         if(index >= 1 and index <= disk_info.get_number_of_disks()):
             return index;
         else:
-            print "Invalid index: ({}) - Make sure that index is inside the range".format(index);
+            msg = "{} ({}) - {}".format("Invalid index:", index,
+                                        "Make sure that index is inside the range");
+            print msg;
             raw_input();
             continue;
 
@@ -248,10 +234,12 @@ def prompt_install_disk(disk_info):
 def prompt_make_sure_that_is_correct_disk(disk_info, selected_disk):
     ## Define the messages...
     warning_msg = """
-ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
-     WE'RE GOING TO A POINT OF NO RETURN
- SO MAKE **SURE** THAT THE DISK INFO IS CORRECT
- IF NOT (OR YOU ARE IN DOUBT PRESS ^C TO CANCEL
++-------------------  WARNING  --------------------+
+| ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK? |
+|       WE ARE GOING TO A POINT OF NO RETURN       |
+|  SO MAKE **SURE** THAT THE DISK INFO IS CORRECT  |
+|  IF NOT OR YOU ARE IN DOUBT PRESS ^C TO CANCEL!  |
++--------------------------------------------------+
 """;
 
     #Print the info to user.
@@ -259,17 +247,15 @@ ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
 
     print "The disk info is:";
     print_disk_item_info(selected_disk,
-                        disk_info.get_disk_info_at(selected_disk -1));
-
-
-    print "\nAre you SURE?:";
+                         disk_info.get_disk_info_at(selected_disk -1));
 
     #Get the input.
+    print "\nAre you SURE?:";
     value = raw_input("Type 'yes' to continue: ");
 
     #Do some sanity checks...
     if(value != "yes"):
-        Output.log_fatal("Invalid value was provided - Canceling...");
+        Output.log_fatal("You need type [yes] to continue - Canceling...");
 
 
 ################################################################################
@@ -278,36 +264,37 @@ ARE YOU SURE THAT YOU SELECTED THE CORRECT DISK?
 def create_bootable_disk(disk_image_path, out_disk_path):
     #Build the commands that will be executed...
     in_disk_path = canonize_path = disk_image_path;
-    cmd_dd      = "sudo dd if={} of={} bs=1M && sync".format(in_disk_path,
-                                                             out_disk_path);
+    cmd_dd       = "sudo dd if={} of={} bs=1M && sync".format(in_disk_path,
+                                                              out_disk_path);
 
     ## Define the messages...
     start_msg = """
--- Creating bootable disk --
-This program uses dd(1) to create the boot disk but dd(1)
-does not generate output while performing the operation.
-
-So take a cup of coffee - When the dd(1) operation is done we show to you :)
-
-PS: dd(1) requires super user mode - So enter your password if requested.
-
++-------------------  Creating bootable disk  --------------------+
+|    This program uses dd(1) to create the boot disk but dd(1)    |
+|  does not generate output while performing its the operation.   |
+|                                                                 |
+|                     So take a cup of coffee                     |
+|       When the dd(1) operation is done we show to you :)        |
+|                                                                 |
+|                PS: dd(1) requires super user mode               |
+|                So enter your password if requested.             |
++-----------------------------------------------------------------+
 """;
 
-    end_msg = "OK... everything is done - Enjoy your Linux installation :)";
+    end_msg = "\n\nEverything is done...\nEnjoy your Linux installation :)";
 
 
     #Print the info to user.
     print start_msg;
 
-    print "Source is       : ({})".format(in_disk_path);
-    print "Destination is  : ({})".format(out_disk_path);
-    print "dd(1) command is: ({})".format(cmd_dd);
+    print "Source is        : ({})".format(in_disk_path);
+    print "Destination is   : ({})".format(out_disk_path);
+    print "dd(1) command is : ({})".format(cmd_dd);
 
 
     #Execute the dd command.
     if(os.system(cmd_dd) != 0):
         Output.log_fatal("Error while executing dd(1)");
-
 
     #Just print a goodbye...
     print end_msg;
@@ -318,29 +305,25 @@ PS: dd(1) requires super user mode - So enter your password if requested.
 ## Script Initialization                                                      ##
 ################################################################################
 def main():
-    #Get the command line options.
-    options = getopt.gnu_getopt(sys.argv[1:],
-                                Constants.ALL_FLAGS_SHORT,
-                                Constants.ALL_FLAGS_LONG);
+    try:
+        #Get the command line options.
+        options = getopt.gnu_getopt(sys.argv[1:],
+                                    Constants.ALL_FLAGS_SHORT,
+                                    Constants.ALL_FLAGS_LONG);
+    except Exception, e:
+        Output.log_fatal(str(e));
 
-    disk_image_path = None;
 
     #Parse the options.
     for key, value in options[0]:
         key = key.strip("-");
+        if  (key in Constants.FLAG_HELP    ): Output.show_help();
+        elif(key in Constants.FLAG_VERSION ): Output.show_version();
 
-        if(key in Constants.FLAG_HELP):
-            Output.show_help();
-            exit(0);
-        elif(key in Constants.FLAG_VERSION):
-            Output.show_version();
-            exit(0);
-        elif(key in Constants.FLAG_IMG):
-            disk_image_path = value;
+    disk_image_path = None if (len(options[1]) == 0) else options[1][0];
 
     if(disk_image_path is None):
-        Output.show_help();
-        exit(1);
+        Output.log_fatal("Missing disk image path");
 
     #Perform some sanity checks...
     disk_image_path = canonize_path(disk_image_path);
@@ -350,9 +333,15 @@ def main():
     disk_info = DiskInfo();
     disk_info.find_all_disks();
 
-    selected_disk = prompt_install_disk(disk_info);
-    prompt_make_sure_that_is_correct_disk(disk_info, selected_disk);
+    #Prompt user.
+    try:
+        selected_disk = prompt_install_disk(disk_info);
+        prompt_make_sure_that_is_correct_disk(disk_info, selected_disk);
+    except KeyboardInterrupt, e:
+        print "\n\nCanceled...";
+        exit(0);
 
+    #We show to user ONE-BASED list but python is ZERO-BASED so the -1.
     name = disk_info.get_disk_info_at(selected_disk-1)["NAME"];
     output_disk_path = canonize_path(os.path.join("/dev/", name));
     create_bootable_disk(disk_image_path, output_disk_path);
