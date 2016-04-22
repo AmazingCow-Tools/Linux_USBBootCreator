@@ -17,6 +17,7 @@ task of turning a usb stick into a bootable usb stick.
 It's mainly a _wrapper_ of ```dd(1)``` letting you forget about the clumsy 
 command line options and providing security checks. 
 
+
 ### DISCLAIMER 
 
 ** ```dd(1)``` MUST BE DONE WITH SUPERUSER PRIVILEGES AND YOU'RE MESSING WITH 
@@ -34,8 +35,8 @@ As usual, you are **very welcomed** to **share** and **hack** it.
 
 ## Usage:
 
-``` bash
-usb-book-creator [-hv] <disk-image-path>
+``` 
+usb-boot-creator [-hv] <disk-image-path>
 
 Options:
   *-h --help     : Show this screen.
@@ -45,7 +46,7 @@ Notes:
   TAKE [A LOT OF] CARE, this program need perform dd(1) as,
   SUPERUSER so double check your disk name before do anything stupid.
 
-  Options marked with * are exclusive, i.e. the usb-book-creator
+  Options marked with * are exclusive, i.e. the usb-boot-creator
   will run that and exit successfully after the operation.
 
 ```
@@ -106,7 +107,7 @@ This software is released under GPLv3.
 Check the TODO file for general things.
 
 This projects uses the COWTODO tags.   
-So install [cowtodo](http://www.github.com/AmazingCow-Tools/COWTODO.html) and run:
+So install [cowtodo](http://www.github.com/AmazingCow-Tools/COWTODO) and run:
 
 ``` bash
 $ cd path/for/the/project
