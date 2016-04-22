@@ -1,6 +1,24 @@
 ================================================================================
 | Start v0.4.x                                                                 |
 ================================================================================
+version 0.4.1 - Apr 22, 2016
+-- General --
+   Fix the typos.
+   Fix the README.
+
+-- Source --
+   usbbootcreator.py
+      - Update the version number.
+      - Fix the typos
+
+-- Info Files --
+   README.md
+     - Fix the wrong links.
+     - Fix the syntax coloring.
+     - Fix the typos.
+
+
+--------------------------------------------------------------------------------
 version 0.4.0 - Apr 15, 2016
 -- General --
    - Corrects and improve the output messages.
