@@ -61,7 +61,7 @@ class Constants:
 
     #App
     APP_NAME      = "usb-boot-creator";
-    APP_VERSION   = "0.4.0";
+    APP_VERSION   = "0.4.1";
     APP_AUTHOR    = "N2OMatt <n2omatt@amazingcow.com>"
     APP_COPYRIGHT = "\n".join(("Copyright (c) 2015, 2016 - Amazing Cow",
                                "This is a free software (GPLv3) - Share/Hack it",
@@ -76,7 +76,7 @@ class Output:
     @staticmethod
     def show_help():
         msg = """Usage:
-usb-book-creator [-hv] <disk-image-path>
+usb-boot-creator [-hv] <disk-image-path>
 
 Options:
   *-h --help    : Show this screen.
@@ -86,7 +86,7 @@ Notes:
   TAKE [A LOT OF] CARE, this program need perform dd(1) as,
   SUPERUSER so double check your disk name before do anything stupid.
 
-  Options marked with * are exclusive, i.e. the usb-book-creator
+  Options marked with * are exclusive, i.e. the usb-boot-creator
   will run that and exit successfully after the operation.
   """;
         print msg;
