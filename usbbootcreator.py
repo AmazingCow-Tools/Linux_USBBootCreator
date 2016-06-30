@@ -264,8 +264,8 @@ def prompt_make_sure_that_is_correct_disk(disk_info, selected_disk):
 def create_bootable_disk(disk_image_path, out_disk_path):
     #Build the commands that will be executed...
     in_disk_path = canonize_path = disk_image_path;
-    cmd_dd       = "sudo dd if={} of={} bs=1M && sync".format(in_disk_path,
-                                                              out_disk_path);
+    cmd_dd       = "sudo dd if=\"{}\" of=\"{}\" bs=1M && sync".format(in_disk_path,
+                                                                      out_disk_path);
 
     ## Define the messages...
     start_msg = """
